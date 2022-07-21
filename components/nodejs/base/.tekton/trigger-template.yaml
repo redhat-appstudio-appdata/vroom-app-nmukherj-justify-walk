@@ -1,0 +1,50 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerTemplate
+metadata:
+  creationTimestamp: null
+  name: nodejs
+  namespace: nmukherj
+spec:
+  params:
+  - name: git-revision
+  resourcetemplates:
+  - apiVersion: tekton.dev/v1beta1
+    kind: PipelineRun
+    metadata:
+      annotations:
+        build.appstudio.openshift.io/application: vroom-app
+        build.appstudio.openshift.io/build: "true"
+        build.appstudio.openshift.io/component: nodejs
+        build.appstudio.openshift.io/type: build
+        build.appstudio.openshift.io/version: "0.1"
+        pipelines.appstudio.openshift.io/type: build
+      creationTimestamp: null
+      generateName: nodejs-
+      labels:
+        build.appstudio.openshift.io/application: vroom-app
+        build.appstudio.openshift.io/build: "true"
+        build.appstudio.openshift.io/component: nodejs
+        build.appstudio.openshift.io/type: build
+        build.appstudio.openshift.io/version: "0.1"
+        pipelines.appstudio.openshift.io/type: build
+      namespace: nmukherj
+    spec:
+      params:
+      - name: git-url
+        value: https://github.com/sbose78/dc-metro-map
+      - name: output-image
+        value: quay.io/redhat-appstudio/user-workload:nmukherj-nodejs-$(tt.params.git-revision)
+      - name: dockerfile
+        value: Dockerfile
+      - name: path-context
+        value: .
+      pipelineRef:
+        bundle: quay.io/redhat-appstudio/build-templates-bundle:0e0b28716550e1adc50443084adecec67f1748ef
+        name: docker-build
+      workspaces:
+      - name: workspace
+        persistentVolumeClaim:
+          claimName: appstudio
+        subPath: nodejs/$(tt.params.git-revision)
+    status: {}
+status: {}
